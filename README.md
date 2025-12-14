@@ -14,6 +14,76 @@ This project is **model-agnostic** and does not require access to any LLM API.
 
 ---
 
+## Local Setup
+
+### Requirements
+- Python 3.9+
+- No external libraries required
+
+### Steps
+1. Clone the repository:
+   ```bash
+   git clone <repo-url>
+   cd llm-evaluation
+
+---
+
+###  Architecture of the Evaluation Pipeline
+
+```markdown
+ Evaluation Pipeline Architecture
+
+The evaluation system follows a modular, linear pipeline:
+
+1. Input Layer  
+   - Chat conversation JSON  
+   - Retrieved context / knowledge JSON  
+
+2. Parsing Layer  
+   - Attempts strict JSON parsing  
+   - Falls back to regex-based extraction if JSON is malformed  
+
+3. Turn Extraction  
+   - Extracts last user query  
+   - Extracts corresponding AI response  
+
+4. Metric Engine  
+   - Relevance (cosine similarity)
+   - Completeness (keyword coverage)
+   - Hallucination risk (entity & number grounding)
+   - Token usage & cost estimation  
+
+5. Output Layer  
+   - Aggregated numerical evaluation scores
+```
+
+## Design Rationale
+
+This solution was intentionally built using lightweight, rule-based methods instead of
+LLM-based or embedding-based evaluators.
+
+Reasons:
+- Real-world chat logs are often malformed → regex fallback ensures robustness
+- Embeddings and LLM judges introduce latency and cost
+- Rule-based metrics are deterministic and explainable
+- The system remains model-agnostic and easy to debug
+- No external APIs → no rate limits or vendor lock-in
+
+## Scalability Considerations
+
+This framework is designed to handle millions of daily conversations:
+
+- No LLM inference calls → zero per-request model cost
+- No embeddings or vector databases
+- All metrics run in linear time O(n)
+- Stateless design enables easy horizontal scaling
+- Can be parallelized across CPU workers
+- Suitable for real-time or batch evaluation
+
+As a result, latency per conversation remains in milliseconds and operational cost stays minimal.
+
+
+
 ## Why this project?
 
 Evaluating LLM outputs is difficult because:
@@ -26,7 +96,7 @@ This framework focuses on **practical evaluation**, similar to real production s
 ---
 
 
----
+
 
 ##  Metrics Implemented
 
